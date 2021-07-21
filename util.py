@@ -115,8 +115,8 @@ class StartProcess:
         # top = location['y']
         # right = location['x'] + size['width']
         # bottom = top + size['height']
-        left = 283
-        top = 480
+        left = 280
+        top = 465
         right = 427
         bottom = 529
         im = Image.open(file_name)
