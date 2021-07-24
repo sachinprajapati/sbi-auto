@@ -153,6 +153,7 @@ class StartProcess:
     def Completed(self):
         self.start_form()
         exp = True
+        fcount = 1
         while exp:
             try:
                 self.FillForm()
@@ -164,12 +165,18 @@ class StartProcess:
                 exp = False
             except Exception as e:
                 traceback.print_tb(e.__traceback__)
+                # self.driver.refresh()
+                fcount += 1
+                if fcount == 5:
+                    print("if start form times", fcount)
+                    return None, False
 
         # self.driver.execute_script('javascript:confirmPayment()')
         # self.driver.execute_script("javascript:paySubmit('RUPAYCARD')")
         #
         # WebDriverWait(self.driver, 10).until(EC.url_contains('https://sbipg.sbi/PG/paymentpage.htm?PaymentID'))
         exp = True
+        count = 1
 
         while exp:
             try:
@@ -198,6 +205,11 @@ class StartProcess:
                     print('window closed')
                     self.driver.refresh()
                     print('refresh page')
+                count += 1
+                if count == 5:
+                    print("if card form", count)
+                    return None, False
+
 
         self.OtpForm()
         WebDriverWait(self.driver, 20).until(
