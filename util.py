@@ -73,19 +73,19 @@ class StartProcess:
         WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable(
             (By.XPATH, '//*[@id="frmFeeParams"]/div[2]/div/div[3]/div[2]/div/div[2]/img'))).click()
 
-        selectMonth = self.driver.find_element_by_xpath(
-            '//*[@id="ui-datepicker-div"]/div/div/select[1][@class="ui-datepicker-month"]')
-        for option in selectMonth.find_elements_by_tag_name('option'):
-            if option.text == 'Mar':
-                option.click()
-                break
+        # selectMonth = self.driver.find_element_by_xpath(
+        #     '//*[@id="ui-datepicker-div"]/div/div/select[1][@class="ui-datepicker-month"]')
+        # for option in selectMonth.find_elements_by_tag_name('option'):
+        #     if option.text == 'Mar':
+        #         option.click()
+        #         break
 
-        selectYear = self.driver.find_element_by_xpath(
-            '//*[@id="ui-datepicker-div"]/div/div/select[2][@class="ui-datepicker-year"]')
-        for option in selectYear.find_elements_by_tag_name('option'):
-            if option.text == '2017':
-                option.click()
-                break
+        # selectYear = self.driver.find_element_by_xpath(
+        #     '//*[@id="ui-datepicker-div"]/div/div/select[2][@class="ui-datepicker-year"]')
+        # for option in selectYear.find_elements_by_tag_name('option'):
+        #     if option.text == '2021':
+        #         option.click()
+        #         break
 
         days = self.driver.find_elements_by_class_name('ui-state-default')
         days[0].click()
@@ -111,10 +111,6 @@ class StartProcess:
         size = element.size
         file_name = 'screenshot1.png'
         self.driver.save_screenshot(file_name)
-        # left = location['x']
-        # top = location['y']
-        # right = location['x'] + size['width']
-        # bottom = top + size['height']
         left = 280
         top = 465
         right = 427
@@ -130,7 +126,9 @@ class StartProcess:
         self.driver.find_element_by_id('preview').click()
         WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.ID, 'ocr')))
         self.driver.find_element_by_id('ocr').click()
-        WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.ID, 'ocr-result')))
+        if 'Text can not be recognized.' in self.driver.page_source:
+            raise ValueError('Captcha text not recognised')
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, 'ocr-result')))
         elem = self.driver.find_element_by_id('ocr-result')
         captcha_text = elem.text.strip().replace(" ", "")
         self.driver.close()
@@ -160,27 +158,46 @@ class StartProcess:
                 self.FillForm()
                 WebDriverWait(self.driver, 10).until(
                     EC.url_to_be('https://www.onlinesbi.com/sbicollect/payment/confirmpayment.htm'))
+                self.driver.execute_script('javascript:confirmPayment()')
+                self.driver.execute_script("javascript:paySubmit('RUPAYCARD')")
+                WebDriverWait(self.driver, 10).until(EC.url_contains('https://sbipg.sbi/PG/paymentpage.htm?PaymentID'))
                 exp = False
             except Exception as e:
                 traceback.print_tb(e.__traceback__)
 
-        self.driver.execute_script('javascript:confirmPayment()')
-        self.driver.execute_script("javascript:paySubmit('RUPAYCARD')")
-
-        WebDriverWait(self.driver, 10).until(EC.url_contains('https://sbipg.sbi/PG/paymentpage.htm?PaymentID'))
+        # self.driver.execute_script('javascript:confirmPayment()')
+        # self.driver.execute_script("javascript:paySubmit('RUPAYCARD')")
+        #
+        # WebDriverWait(self.driver, 10).until(EC.url_contains('https://sbipg.sbi/PG/paymentpage.htm?PaymentID'))
         exp = True
 
         while exp:
             try:
+                url = self.driver.current_url
                 self.CardForm()
-                WebDriverWait(self.driver, 10).until(EC.url_to_be('https://prdrupayias.insolutionsglobal.com/NPCI_IAS_NSDL/authOTP.do'))
+                time.sleep(2)
+                if url == self.driver.current_url:
+                    raise ValueError('Not submitted')
+                # WebDriverWait(self.driver, 10).until(EC.url_to_be('https://prdrupayias.insolutionsglobal.com/NPCI_IAS_NSDL/authOTP.do'))
                 # WebDriverWait(self.driver, 5).until(EC.url_changes)
                 exp = False
+            # except AssertionError:
+            #     print('except AssertionError text not recognised')
+            #     if len(self.driver.window_handles) > 1:
+            #         self.driver.close()
+            #         self.driver.switch_to.window(self.driver.window_handles[0])
+            #         print('window closed')
+            #         self.driver.refresh()
+            #         print('refresh page')
             except Exception as e:
                 traceback.print_tb(e.__traceback__)
+                print("nos of tab", len(self.driver.window_handles))
                 if len(self.driver.window_handles) > 1:
                     self.driver.close()
                     self.driver.switch_to.window(self.driver.window_handles[0])
+                    print('window closed')
+                    self.driver.refresh()
+                    print('refresh page')
 
         self.OtpForm()
         WebDriverWait(self.driver, 20).until(

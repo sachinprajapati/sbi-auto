@@ -10,6 +10,7 @@ import csv
 import sys
 from datetime import datetime, date
 import os
+import traceback
 
 BASE_DIR = Path(__file__).resolve().parent
 url = 'https://www.onlinesbi.com/sbicollect/icollecthome.htm?corpID=3681157'
@@ -22,7 +23,8 @@ except Exception as e:
     sys.exit()
 
 
-driver = webdriver.Chrome(str(BASE_DIR) + '/chromedriver.exe')
+# driver = webdriver.Chrome(str(BASE_DIR) + '/chromedriver.exe')
+driver = webdriver.Chrome(str(BASE_DIR) + '/chromedriver')
 driver.set_window_size(1050, 721)
 
 rows = []
@@ -47,9 +49,7 @@ if date.today() < last:
             i.extend([ref_no, resp])
             rows.append(i)
         except Exception as e:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print(exc_type, fname, exc_tb.tb_lineno)
+            traceback.print_tb(e.__traceback__)
 
     print('rows', rows)
 
