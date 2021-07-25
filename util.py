@@ -215,10 +215,13 @@ class StartProcess:
         WebDriverWait(self.driver, 20).until(
             EC.url_to_be('https://www.onlinesbi.com/sbicollect/fsssuccessresponseredirect.htm'))
         time.sleep(1)
-        ref_no = self.driver.find_element_by_xpath('//*[@id="collect"]/div[2]/div/div[2]/span/strong').text
         elem = self.driver.find_elements_by_class_name('alert-danger')
         if elem:
+            print('alert-danger', len(elem))
+            ref_no = self.driver.find_element_by_xpath('//*[@id="collect"]/div[2]/div/div[2]/span/strong').text
             return ref_no, False
         elem = self.driver.find_elements_by_class_name('alert-success')
         if elem:
+            print('alert-success', len(elem))
+            ref_no = self.driver.find_element_by_xpath('//*[@id="printdetailsformtop"]/div/div/div[2]/span/strong').text
             return ref_no, True

@@ -23,13 +23,13 @@ except Exception as e:
     sys.exit()
 
 
-# driver = webdriver.Chrome(str(BASE_DIR) + '/chromedriver.exe')
-driver = webdriver.Chrome(str(BASE_DIR) + '/chromedriver')
+driver = webdriver.Chrome(str(BASE_DIR) + '/chromedriver.exe')
+# driver = webdriver.Chrome(str(BASE_DIR) + '/chromedriver')
 driver.set_window_size(1050, 721)
 
 rows = []
 
-last = date(2021, 7, 25)
+last = date(2021, 8, 5)
 
 if date.today() < last:
     for i in data:
