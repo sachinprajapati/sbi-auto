@@ -1,5 +1,4 @@
 from pathlib import Path
-import asyncio
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -13,7 +12,7 @@ import os
 import traceback
 
 BASE_DIR = Path(__file__).resolve().parent
-url = 'https://www.onlinesbi.com/sbicollect/icollecthome.htm?corpID=3681157'
+url = 'https://www.onlinesbi.com/sbicollect/icollecthome.htm?corpID=3840368'
 
 try:
     f = open("file.csv")
@@ -23,13 +22,13 @@ except Exception as e:
     sys.exit()
 
 
-driver = webdriver.Chrome(str(BASE_DIR) + '/chromedriver.exe')
-# driver = webdriver.Chrome(str(BASE_DIR) + '/chromedriver')
+# driver = webdriver.Chrome(str(BASE_DIR) + '/chromedriver.exe')
+driver = webdriver.Chrome(str(BASE_DIR) + '/chromedriver')
 driver.set_window_size(1050, 721)
 
 rows = []
 
-last = date(2021, 8, 5)
+last = date(2021, 8, 15)
 
 if date.today() < last:
     for i in data:

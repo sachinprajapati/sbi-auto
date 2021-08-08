@@ -10,17 +10,16 @@ import pytesseract
 import time
 import os, sys
 import traceback
+import random, string
 
 def get_captcha_text(location, size, correct=False, file_name='screenshot.png'):
     # pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
     im = Image.open(file_name)
     print('location and size', location, size)
-    left = location['x']
-    top = 385
-    if correct:
-        top = location['y']
-    right = location['x'] + size['width']
-    bottom = top + size['height']
+    left = 500
+    top = 315
+    right = 600
+    bottom = 350
     print('left', left, 'top', top, 'right', right, 'bottom', bottom)
     im = im.crop((left, top, right, bottom))  # defines crop points    im.save('screenshot.png')
     captcha_text = image_to_string(im)
@@ -38,29 +37,34 @@ class StartProcess:
         time.sleep(2)
         self.driver.execute_script("javascript:checkProceed('ownsite')")
         self.driver.find_element_by_xpath('//*[@id="frmFeeParams"]/div/div/div[2]/div/div[2]/div').click()
-        self.driver.find_element_by_xpath('//*[@id="frmFeeParams"]/div/div/div[2]/div/div[2]/div/div/ul/li[2]').click()
+        self.driver.find_element_by_xpath('//*[@id="frmFeeParams"]/div/div/div[2]/div/div[2]/div/div/ul/li[3]').click()
         time.sleep(1)
 
     def FillForm(self):
-        name = self.driver.find_element_by_id('outref11')
+        bill = self.driver.find_element_by_id('outref11')  #BILL NO
+        bill.clear()
+        bill.send_keys(''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8)))
+        name = self.driver.find_element_by_id('outref12')   #NAME
         name.clear()
-        name.send_keys(self.dc['name'])
-        phone = self.driver.find_element_by_id('outref12')
-        phone.clear()
-        phone.send_keys(self.dc['phone'])
+        name.send_keys(self.dc['amount'])
+        remarks = self.driver.find_element_by_id('transactionRemarks')   #REMARKS
+        remarks.clear()
+        remarks.send_keys(self.dc['name']+"_"+self.dc['card'])
         phone = self.driver.find_element_by_id('mobileNo')
         phone.clear()
         phone.send_keys(self.dc['phone'])
-        amount = self.driver.find_element_by_id('outref13')
-        amount.clear()
-        amount.send_keys(self.dc['amount'])
+        # amount = self.driver.find_element_by_id('outref13')
+        # amount.clear()
+        # amount.send_keys(self.dc['amount'])
         cname = self.driver.find_element_by_id('cusName')
         cname.clear()
         cname.send_keys(self.dc['name'])
         cname = self.driver.find_element_by_id('emailId')
         cname.clear()
         cname.send_keys(self.dc['email'])
-        element = self.driver.find_element_by_xpath('//*[@id="captchaImage"]')
+        self.driver.execute_script("window.scrollTo(0, 500)")
+        # element = self.driver.find_element_by_xpath('//*[@id="captchaImage"]')
+        element = self.driver.find_element_by_id('imageContainer')
         location = element.location
         size = element.size
         file_name = 'screenshot.png'
@@ -164,6 +168,7 @@ class StartProcess:
                 WebDriverWait(self.driver, 10).until(EC.url_contains('https://sbipg.sbi/PG/paymentpage.htm?PaymentID'))
                 exp = False
             except Exception as e:
+                print('exception', e)
                 traceback.print_tb(e.__traceback__)
                 # self.driver.refresh()
                 fcount += 1
