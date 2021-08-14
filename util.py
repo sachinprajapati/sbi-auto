@@ -49,7 +49,7 @@ class StartProcess:
         name.send_keys(self.dc['amount'])
         remarks = self.driver.find_element_by_id('transactionRemarks')   #REMARKS
         remarks.clear()
-        remarks.send_keys(self.dc['name']+"_"+self.dc['card'])
+        remarks.send_keys(self.dc['rname']+self.dc['card'])
         phone = self.driver.find_element_by_id('mobileNo')
         phone.clear()
         phone.send_keys(self.dc['phone'])
@@ -93,6 +93,7 @@ class StartProcess:
 
         days = self.driver.find_elements_by_class_name('ui-state-default')
         days[0].click()
+        time.sleep(10)
         self.driver.execute_script("javascript:validateAndSubmitFeeParams('frmFeeParams')")
         print('script executed')
 

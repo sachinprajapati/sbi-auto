@@ -37,10 +37,11 @@ if date.today() < last:
         dc['date'] = datetime.strptime(i[1], '%m/%Y')
         dc['cvv'] = i[2]
         dc['ipin'] = i[3]
-        dc['name'] = i[4]
-        dc['email'] = i[5]
-        dc['phone'] = i[6]
-        dc['amount'] = i[7]
+        dc['rname'] = i[4]
+        dc['name'] = i[5]
+        dc['email'] = i[6]
+        dc['phone'] = i[7]
+        dc['amount'] = i[8]
         driver.get(url)
         sp = StartProcess(driver, dc)
         try:
