@@ -149,11 +149,20 @@ class StartProcess:
 
 
     def OtpForm(self):
-        WebDriverWait(self.driver, 10).until(EC.url_to_be('https://prdrupayias.insolutionsglobal.com/NPCI_IAS_NSDL/authOTP.do'))
-        WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.ID, 'txtipin')))
-        elem = self.driver.find_element_by_id('txtipin')
-        elem.send_keys(self.dc['ipin'])
-        self.driver.find_element_by_id('btnverify').click()
+        print("in otp form")
+        if len(self.dc['ipin']) == 4:
+            WebDriverWait(self.driver, 10).until(EC.url_to_be('https://prdrupayias.insolutionsglobal.com/NPCI_IAS_NSDL/authOTP.do'))
+            WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.ID, 'txtipin')))
+            elem = self.driver.find_element_by_id('txtipin')
+            elem.send_keys(self.dc['ipin'])
+            self.driver.find_element_by_id('btnverify').click()
+        else:
+            WebDriverWait(self.driver, 10).until(
+                EC.url_to_be('https://paysecure.yalamanchili.in/naradaacsweb/acs/authenticate'))
+            WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.ID, 'ipin')))
+            elem = self.driver.find_element_by_id('ipin')
+            elem.send_keys(self.dc['ipin'])
+            self.driver.find_element_by_id('otpbut').click()
 
     def Completed(self):
         self.start_form()
@@ -215,7 +224,6 @@ class StartProcess:
                 if count == 5:
                     print("if card form", count)
                     return None, False
-
 
         self.OtpForm()
         WebDriverWait(self.driver, 20).until(
