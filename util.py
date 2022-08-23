@@ -2,7 +2,7 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from pytesseract import image_to_string
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from PIL import Image
@@ -13,14 +13,22 @@ import traceback
 import random, string
 
 def get_captcha_text(location, size, correct=False, file_name='screenshot.png'):
-    # pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
     im = Image.open(file_name)
-    print('location and size', location, size)
-    left = 487
+    left = 460
     top = 327
     right = 600
     bottom = 360
-    print('left', left, 'top', top, 'right', right, 'bottom', bottom)
+    im = im.crop((left, top, right, bottom))  # defines crop points    im.save('screenshot.png')
+    captcha_text = image_to_string(im)
+    im.save('captcha_'+file_name)
+    return captcha_text
+
+def get_second_text(file_name='screenshot1.png'):
+    im = Image.open(file_name)
+    left = 650
+    top = 438
+    right = 800
+    bottom = 500
     im = im.crop((left, top, right, bottom))  # defines crop points    im.save('screenshot.png')
     captcha_text = image_to_string(im)
     im.save('captcha_'+file_name)
@@ -36,14 +44,40 @@ class StartProcess:
         self.driver.find_element_by_id('proceedcheck_english').click()
         time.sleep(2)
         self.driver.execute_script("javascript:checkProceed('ownsite')")
+        WebDriverWait(self.driver, 10).until(EC.url_to_be('https://www.onlinesbi.sbi/sbicollect/sbclink/displayinstitutiontype.htm'))
+        elem = self.driver.find_element_by_css_selector('[data-id="selStateName"]')
+        elem.click()
+        time.sleep(1)
+        elem = self.driver.find_element_by_xpath('//*[@id="stateID"]/div/div/ul/li[36]/a/span[1]')
+        elem.click()
+        time.sleep(1)
+        # elem = self.driver.find_element_by_css_selector('[data-id="instTypeID"]')
+        # elem.click()
+        elem = self.driver.find_element_by_id('instTypeID')
+        elem.send_keys('Educational Institutions')
+        # time.sleep(1)
+        # elem.select_by_value('IN00058245')
+        self.driver.execute_script('javascript:submitSelectedStateAndType()')
+        WebDriverWait(self.driver, 10).until(EC.url_to_be('https://www.onlinesbi.sbi/sbicollect/payment/listinstitution.htm'))
+        elem = self.driver.find_element_by_css_selector('[data-id="selectedInstID"]')
+        elem.click()
+        time.sleep(1)
+        # WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.ID, 'selectedInstID')))
+        # elem = self.driver.find_element_by_id('selectedInstID')
+        # elem.send_keys('IN00058245')
+        time.sleep(1)
+        elem = self.driver.find_element_by_xpath('//*[@id="select-institute"]/div/div/ul/li[159]/a/span[1]')
+        elem.click()
+        self.driver.execute_script("javascript:submitInstitutionDetail('Educational Institutions')")
+        WebDriverWait(self.driver, 10).until(EC.url_to_be('https://www.onlinesbi.sbi/sbicollect/payment/listcategory.htm'))
         self.driver.find_element_by_xpath('//*[@id="frmFeeParams"]/div/div/div[2]/div/div[2]/div').click()
         self.driver.find_element_by_xpath('//*[@id="frmFeeParams"]/div/div/div[2]/div/div[2]/div/div/ul/li[4]').click()
         time.sleep(1)
 
     def FillForm(self):
-        bill = self.driver.find_element_by_id('outref11')  #BILL NO
-        bill.clear()
-        bill.send_keys(''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8)))
+        # bill = self.driver.find_element_by_id('outref11')  #BILL NO
+        # bill.clear()
+        # bill.send_keys(''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8)))
         name = self.driver.find_element_by_id('outref12')   #NAME
         name.clear()
         name.send_keys(self.dc['amount'])
@@ -62,39 +96,25 @@ class StartProcess:
         cname = self.driver.find_element_by_id('emailId')
         cname.clear()
         cname.send_keys(self.dc['email'])
-        self.driver.execute_script("window.scrollTo(0, 500)")
+        # self.driver.execute_script("window.scrollTo(0, 500)")
         # element = self.driver.find_element_by_xpath('//*[@id="captchaImage"]')
-        element = self.driver.find_element_by_id('imageContainer')
-        location = element.location
-        size = element.size
-        file_name = 'screenshot.png'
-        self.driver.save_screenshot(file_name)
-        captcha = self.driver.find_element_by_id('captchaValue')
-        captcha.clear()
-        captcha_text = get_captcha_text(location, size)
-        print('captcha_text', captcha_text)
-        assert not captcha_text.isalnum()
-        captcha.send_keys(captcha_text)
+        # element = self.driver.find_element_by_id('imageContainer')
+        # location = element.location
+        # size = element.size
+        # file_name = 'screenshot.png'
+        # self.driver.save_screenshot(file_name)
+        # captcha = self.driver.find_element_by_id('captchaValue')
+        # captcha.clear()
+        # captcha_text = get_captcha_text(location, size)
+        # print('captcha_text', captcha_text)
+        # assert not captcha_text.isalnum()
+        # captcha.send_keys(captcha_text)
         WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable(
             (By.XPATH, '//*[@id="frmFeeParams"]/div[2]/div/div[3]/div[2]/div/div[2]/img'))).click()
 
-        # selectMonth = self.driver.find_element_by_xpath(
-        #     '//*[@id="ui-datepicker-div"]/div/div/select[1][@class="ui-datepicker-month"]')
-        # for option in selectMonth.find_elements_by_tag_name('option'):
-        #     if option.text == 'Mar':
-        #         option.click()
-        #         break
-
-        # selectYear = self.driver.find_element_by_xpath(
-        #     '//*[@id="ui-datepicker-div"]/div/div/select[2][@class="ui-datepicker-year"]')
-        # for option in selectYear.find_elements_by_tag_name('option'):
-        #     if option.text == '2021':
-        #         option.click()
-        #         break
-
         days = self.driver.find_elements_by_class_name('ui-state-default')
         days[0].click()
-        self.driver.execute_script("javascript:validateAndSubmitFeeParams('frmFeeParams')")
+        # self.driver.execute_script("javascript:validateAndSubmitFeeParams('frmFeeParams')")
         print('script executed')
 
     def CardForm(self):
@@ -108,8 +128,8 @@ class StartProcess:
         elem.send_keys(self.dc['date'].year)
         elem = self.driver.find_element_by_id('cardholderName')
         elem.send_keys(self.dc['name'])
-        WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.ID, 'cvd2')))
-        elem = self.driver.find_element_by_id('cvd2')
+        WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.ID, 'cardCvv')))
+        elem = self.driver.find_element_by_id('cardCvv')
         elem.send_keys(self.dc['cvv'])
         self.driver.execute_script("document.body.style.zoom='200%'")
         self.driver.execute_script("window.scrollTo(0, 500)")
@@ -125,21 +145,7 @@ class StartProcess:
         im = Image.open(file_name)
         im = im.crop((left, top, right, bottom))
         im.save('captcha_' + file_name)
-        self.driver.execute_script('''window.open("https://www.newocr.com/", "_blank");''')
-        self.driver.switch_to.window(self.driver.window_handles[1])
-        print('current_url is', self.driver.current_url)
-        WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.ID, 'userfile')))
-        self.driver.find_element_by_id('userfile').send_keys(os.getcwd()+'/captcha_'+file_name)
-        self.driver.find_element_by_id('preview').click()
-        WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.ID, 'ocr')))
-        self.driver.find_element_by_id('ocr').click()
-        if 'Text can not be recognized.' in self.driver.page_source:
-            raise ValueError('Captcha text not recognised')
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, 'ocr-result')))
-        elem = self.driver.find_element_by_id('ocr-result')
-        captcha_text = elem.text.strip().replace(" ", "")
-        self.driver.close()
-        self.driver.switch_to.window(self.driver.window_handles[0])
+        captcha_text = get_second_text()
         print('after close current url', self.driver.current_url, 'captcha_text', captcha_text)
         captcha = self.driver.find_element_by_id('passline')
         # WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((By.ID, 'text-image')))
@@ -153,11 +159,23 @@ class StartProcess:
     def OtpForm(self):
         print("in otp form")
         if len(self.dc['ipin']) == 4:
-            WebDriverWait(self.driver, 10).until(EC.url_to_be('https://prdrupayias.insolutionsglobal.com/NPCI_IAS_NSDL/authOTP.do'))
-            WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.ID, 'txtipin')))
-            elem = self.driver.find_element_by_id('txtipin')
+            # WebDriverWait(self.driver, 10).until(EC.url_to_be('https://prdrupayias.insolutionsglobal.com/NPCI_IAS_NSDL/authOTP.do'))
+            # WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.ID, 'txtipin')))
+            # elem = self.driver.find_element_by_id('txtipin')
+            # elem.send_keys(self.dc['ipin'])
+            # self.driver.find_element_by_id('btnverify').click()
+            WebDriverWait(self.driver, 10).until(EC.url_to_be('https://isg-3dsecure.in/GeniusVACS-NSDL/PaRequestHandler'))
+            WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.ID, 'pwd')))
+            elem = self.driver.find_element_by_id('pwd')
             elem.send_keys(self.dc['ipin'])
-            self.driver.find_element_by_id('btnverify').click()
+            self.driver.find_element_by_id('btnSubmitId').click()
+        if len(self.dc['ipin']) == 9:
+            WebDriverWait(self.driver, 10).until(
+                EC.url_to_be('https://acssp.thecardservicesonline.com/mdpayacs/pareq'))
+            WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.ID, 'IPIN')))
+            elem = self.driver.find_element_by_id('IPIN')
+            elem.send_keys(self.dc['ipin'])
+            self.driver.find_element_by_id('IDCT_BUTID').click()
         else:
             WebDriverWait(self.driver, 10).until(
                 EC.url_to_be('https://paysecure.yalamanchili.in/naradaacsweb/acs/authenticate'))
@@ -173,15 +191,17 @@ class StartProcess:
         while exp:
             try:
                 self.FillForm()
-                WebDriverWait(self.driver, 10).until(
-                    EC.url_to_be('https://www.onlinesbi.com/sbicollect/payment/confirmpayment.htm'))
+                print('after fill form')
+                WebDriverWait(self.driver, 30).until(
+                    EC.url_contains('sbicollect/payment/confirmpayment.htm'))
+                print('after confirmpayment wait')
                 self.driver.execute_script('javascript:confirmPayment()')
                 self.driver.execute_script("javascript:paySubmit('PREPAID')")
-                WebDriverWait(self.driver, 10).until(EC.url_contains('https://sbipg.sbi/PG/paymentpage.htm?PaymentID'))
+                WebDriverWait(self.driver, 10).until(EC.url_contains('https://sbipg.sbi/PG/paymentpage.htm'))
                 exp = False
             except Exception as e:
                 print('exception', e)
-                traceback.print_tb(e.__traceback__)
+                # traceback.print_tb(e.__traceback__)
                 # self.driver.refresh()
                 fcount += 1
                 if fcount == 3:
